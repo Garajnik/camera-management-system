@@ -17,7 +17,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import JsonEditorVue from 'json-editor-vue'
-import {Button} from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
+import { fetchConfig, saveConfig } from '../services/cameraService.ts'
 
 const jsonData = ref(null)
 const saving = ref(false)
@@ -48,28 +49,20 @@ const mockJSON = {
   queue_max_mb: 1024
 }
 
-async function fetchData() {
+onMounted(async () => {
   try {
-    const res = await fetch('/api/settings')
-    if (!res.ok) throw new Error('Ошибка сети')
-    jsonData.value = await res.json()
+    jsonData.value = await fetchConfig()
   } catch {
     jsonData.value = JSON.parse(JSON.stringify(mockJSON))
   }
-}
-onMounted(fetchData)
+})
 
 async function save() {
   saving.value = true
   error.value = ''
   success.value = false
   try {
-    const res = await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jsonData.value)
-    })
-    if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`)
+    await saveConfig(jsonData.value)
     success.value = true
   } catch (err) {
     error.value = err.message

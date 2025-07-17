@@ -3,19 +3,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
-interface DefaultCameraConfig {
-  width: number | undefined
-  height: number | undefined
-  offset_x: number | undefined
-  offset_y: number | undefined
-  pixel_format: string | undefined
-  fps: number | undefined
-  exposure: number | undefined
-  exposure_mode: number | undefined
-  gain: number | undefined
-  gev_scpd: number | undefined
-}
+import type { DefaultCameraConfig } from '../services/types.ts'
+import { fetchDefaultConfig, saveDefaultConfig } from '../services/cameraService'
 
 const defaultConfig = reactive<DefaultCameraConfig>({
   width: undefined,
@@ -32,27 +21,13 @@ const defaultConfig = reactive<DefaultCameraConfig>({
 
 const initialConfig = ref<DefaultCameraConfig | null>(null)
 
-const fetchDefaultConfig = async () => {
+onMounted(async () => {
   try {
-    const response = await fetch('/api/default-camera-config')
-    const data = await response.json()
-    const settings: DefaultCameraConfig = {
-      width: data.width ?? undefined,
-      height: data.height ?? undefined,
-      offset_x: data.offset_x ?? undefined,
-      offset_y: data.offset_y ?? undefined,
-      pixel_format: data.pixel_format ?? undefined,
-      fps: data.fps ?? undefined,
-      exposure: data.exposure ?? undefined,
-      exposure_mode: data.exposure_mode ?? undefined,
-      gain: data.gain ?? undefined,
-      gev_scpd: data.gev_scpd ?? undefined
-    }
-    Object.assign(defaultConfig, settings)
-    initialConfig.value = { ...settings }
+    const config = await fetchDefaultConfig()
+    Object.assign(defaultConfig, config)
+    initialConfig.value = { ...config }
   } catch (error) {
     console.error('Failed to fetch default config:', error)
-    // Запасной вариант
     const fallbackConfig: DefaultCameraConfig = {
       width: 4096,
       height: 2160,
@@ -68,33 +43,13 @@ const fetchDefaultConfig = async () => {
     Object.assign(defaultConfig, fallbackConfig)
     initialConfig.value = { ...fallbackConfig }
   }
-}
+})
 
 const saveConfig = async () => {
   try {
-    const configToSave = {
-      width: defaultConfig.width ?? null,
-      height: defaultConfig.height ?? null,
-      offset_x: defaultConfig.offset_x ?? null,
-      offset_y: defaultConfig.offset_y ?? null,
-      pixel_format: defaultConfig.pixel_format ?? null,
-      fps: defaultConfig.fps ?? null,
-      exposure: defaultConfig.exposure ?? null,
-      exposure_mode: defaultConfig.exposure_mode ?? null,
-      gain: defaultConfig.gain ?? null,
-      gev_scpd: defaultConfig.gev_scpd ?? null
-    }
-    const response = await fetch('/api/default-camera-config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(configToSave)
-    })
-    if (response.ok) {
-      initialConfig.value = { ...defaultConfig }
-      console.log('Default config saved successfully')
-    } else {
-      console.error('Failed to save default config:', response.statusText)
-    }
+    await saveDefaultConfig(defaultConfig)
+    initialConfig.value = { ...defaultConfig }
+    console.log('Default config saved successfully')
   } catch (error) {
     console.error('Error saving default config:', error)
   }
@@ -105,10 +60,6 @@ const resetConfig = () => {
     Object.assign(defaultConfig, initialConfig.value)
   }
 }
-
-onMounted(() => {
-  fetchDefaultConfig()
-})
 </script>
 
 <template>
