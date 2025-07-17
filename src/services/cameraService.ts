@@ -73,7 +73,7 @@ export async function saveCameraSettings(ipAddress: string, settings: CameraSett
 }
 
 export async function fetchConfig() {
-  const res = await fetch('/api/settings')
+  const res = await fetch('https://h-grabber-api.research.dmdevelopment.ru/config')
   if (!res.ok) {
     throw new Error('Ошибка сети')
   }
@@ -81,7 +81,7 @@ export async function fetchConfig() {
 }
 
 export async function saveConfig(data: any) {
-  const res = await fetch('/api/settings', {
+  const res = await fetch('https://h-grabber-api.research.dmdevelopment.ru/config', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
