@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+  import { SidebarProvider } from "@/components/ui/sidebar";
+  import AppSidebar from "./components/AppSidebar.vue";
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-    </a>
-  </div>
-  <HelloWorld/>
+ <SidebarProvider>
+    <AppSidebar />
+    <main>
+      <slot />
+  <router-view/>
+    </main class="main">
+  </SidebarProvider>
 </template>
 
 <style scoped>

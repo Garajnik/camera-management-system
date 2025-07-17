@@ -1,13 +1,15 @@
 <template>
   <div>
-    Hellow
+
   </div>
 </template>
 
-<script>
-  export default {
+<script lang="ts">
+
+  export default ({
+    name:"HelloWorld",
     
-  }
+  })
 </script>
 
 <style scoped>
